@@ -216,6 +216,7 @@
 
         // Nút "KHÔNG" chạy lung tung với proximity detection
         let lastPosition = { x: 0, y: 0 };
+        let isInitialized = false;
 
         function moveNoButton(cursorX, cursorY) {
             // Lấy vị trí và kích thước của nút ĐẸP
@@ -350,15 +351,36 @@
 
         // Touchstart để khởi tạo position ngay lập tức
         document.addEventListener('touchstart', (e) => {
-            if (!noBtn.style.position || noBtn.style.position === 'relative') {
-                noBtn.style.position = 'fixed';
-                const rect = noBtn.getBoundingClientRect();
-                noBtn.style.left = rect.left + 'px';
-                noBtn.style.top = rect.top + 'px';
-                lastPosition.x = rect.left;
-                lastPosition.y = rect.top;
+            if (!isInitialized) {
+                initializeNoButtonPosition();
             }
         });
+
+        // Khởi tạo vị trí nút "KHÔNG" khi trang load
+        function initializeNoButtonPosition() {
+            if (isInitialized) return;
+
+            // Chờ để đảm bảo các element đã render đúng
+            setTimeout(() => {
+                const rect = noBtn.getBoundingClientRect();
+                lastPosition.x = rect.left;
+                lastPosition.y = rect.top;
+
+                // Di chuyển nút sang vị trí ngẫu nhiên ngay lập tức
+                moveNoButton();
+                isInitialized = true;
+            }, 100);
+        }
+
+        // Khởi tạo khi trang load xong
+        window.addEventListener('load', initializeNoButtonPosition);
+
+        // Backup: khởi tạo sau 500ms nếu load event chưa chạy
+        setTimeout(() => {
+            if (!isInitialized) {
+                initializeNoButtonPosition();
+            }
+        }, 500);
 
         // Nút "CÓ" - Hiện pháo hoa và hoa
         yesBtn.addEventListener('click', () => {
@@ -379,13 +401,13 @@
             }, 4500);
         });
 
-        // Fireworks effect
+        // Fireworks effect (giảm lag)
         function launchFireworks() {
             const particles = [];
-            const particleCount = 100;
+            const particleCount = 50; // Giảm từ 100 xuống 50
             let animationId;
 
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 5; i++) { // Giảm từ 8 xuống 5
                 setTimeout(() => {
                     const x = Math.random() * canvas.width;
                     const y = Math.random() * canvas.height / 2;
@@ -396,11 +418,11 @@
                             y: y,
                             vx: (Math.random() - 0.5) * 10,
                             vy: (Math.random() - 0.5) * 10,
-                            life: 100,
+                            life: 80, // Giảm từ 100 xuống 80
                             color: `hsl(${Math.random() * 360}, 100%, 50%)`
                         });
                     }
-                }, i * 500);
+                }, i * 600);
             }
 
             function animate() {
@@ -433,13 +455,13 @@
             animate();
         }
 
-        // Flower explosions with code particles
+        // Flower explosions with code particles (giảm lag)
         function createFlowerExplosions() {
             const flowers = ['🌸', '🌺', '🌼', '🌻', '🌷', '🌹', '💐', '🏵️'];
             const codeSymbols = ['<3', '♥', '★', '✨', '💕', '💖', '💗', '💝', '🌟', '⭐', '✿', '❀', '❁', '❃', '❋'];
 
-            // Tạo nhiều điểm nổ hoa
-            for (let explosion = 0; explosion < 15; explosion++) {
+            // Giảm số điểm nổ hoa từ 15 xuống 10
+            for (let explosion = 0; explosion < 10; explosion++) {
                 setTimeout(() => {
                     const centerX = Math.random() * window.innerWidth;
                     const centerY = Math.random() * (window.innerHeight * 0.6);
@@ -454,13 +476,13 @@
                     flowerCenter.style.zIndex = '5';
                     document.body.appendChild(flowerCenter);
 
-                    // Nổ ra các code particles
-                    for (let i = 0; i < 25; i++) {
+                    // Giảm code particles từ 25 xuống 15
+                    for (let i = 0; i < 15; i++) {
                         const particle = document.createElement('div');
                         particle.className = 'code-particle';
                         particle.textContent = codeSymbols[Math.floor(Math.random() * codeSymbols.length)];
 
-                        const angle = (Math.PI * 2 * i) / 25;
+                        const angle = (Math.PI * 2 * i) / 15;
                         const velocity = 100 + Math.random() * 100;
                         const vx = Math.cos(angle) * velocity;
                         const vy = Math.sin(angle) * velocity;
@@ -476,7 +498,7 @@
                         let posY = centerY;
                         let currentVx = vx;
                         let currentVy = vy;
-                        let life = 100;
+                        let life = 70; // Giảm từ 100 xuống 70
 
                         const animateParticle = () => {
                             posX += currentVx * 0.02;
@@ -507,11 +529,12 @@
             }
         }
 
-        // Money rain effect
+        // Money rain effect (giảm lag)
         function createMoneyRain() {
             const moneySymbols = ['💵', '💴', '💶', '💷', '💰', '💸'];
 
-            for (let i = 0; i < 80; i++) {
+            // Giảm từ 80 xuống 50
+            for (let i = 0; i < 50; i++) {
                 setTimeout(() => {
                     const money = document.createElement('div');
                     money.className = 'money';
