@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(git init)",
-      "Bash(git add .)"
+      "Bash(git add .)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd 20/10 celebration website with fireworks and flowers\n\nFeatures:\n- Interactive YES/NO buttons\n- Moving NO button that dodges the cursor\n- Fireworks animation when clicking YES\n- Falling flowers effect\n- Special message for 20/10\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(gh repo create 20-10-ha-bao-ngan-hieu --public --source=. --remote=origin --push)",
+      "Bash(vercel --prod --yes)",
+      "Bash(git add index.html)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nUpdate with explosion flower effects and money rain\n\nFeatures added:\n- Flower explosion with code particles (hearts, stars, flowers)\n- More meaningful congratulation message\n- Money rain effect after flowers\n- Enhanced visual effects with 15 explosion points\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push origin master)"
     ],
     "deny": [],
     "ask": []

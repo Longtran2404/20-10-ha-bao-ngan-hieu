@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "20-10-ha-bao-ngan-hieu",
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ]
+}

@@ -32,6 +32,16 @@
             font-size: 2.5em;
             margin-bottom: 30px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            padding: 0 20px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
         }
 
         .button-container {
@@ -50,6 +60,16 @@
             transition: all 0.3s ease;
             font-weight: bold;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            button {
+                padding: 15px 30px;
+                font-size: 1.2em;
+            }
+            .button-container {
+                gap: 20px;
+            }
         }
 
         #yesBtn {
@@ -119,6 +139,16 @@
             margin-top: 30px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             animation: fadeIn 1s ease-in;
+            padding: 0 20px;
+        }
+
+        @media (max-width: 768px) {
+            .message {
+                font-size: 1em;
+            }
+            .message p {
+                font-size: 1em !important;
+            }
         }
 
         @keyframes fadeIn {
@@ -158,15 +188,16 @@
         </div>
 
         <div id="messageContainer" class="message">
-            <p style="font-size: 1.8em; margin-bottom: 15px;">🎉 Chúc Mừng 20/10! 🎉</p>
-            <p style="font-size: 1em; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-                💐 Chúc bạn luôn rạng rỡ như ánh mặt trời,<br>
-                Tươi trẻ như hoa, xinh đẹp như mơ.<br>
-                Hạnh phúc mỗi ngày, thành công trong công việc,<br>
-                Và luôn được yêu thương trọn vẹn! 💝
+            <p style="font-size: 1.5em; margin-bottom: 20px;">🎉 Chúc Mừng 20/10 Em Yêu! 🎉</p>
+            <p style="font-size: 1em; line-height: 1.8; max-width: 650px; margin: 0 auto 15px;">
+                💐 Chúc em 20/10 thật vui vẻ và hạnh phúc!<br>
+                Hãy cố gắng làm việc thật tốt để có tương lai tươi sáng nhé!<br>
+                Nhớ giữ gìn sức khỏe, ngủ sớm để da mặt bớt mụn,<br>
+                và đừng quên uống nhiều nước ấm mỗi ngày.<br>
+                Luôn xinh đẹp, rạng rỡ và yêu đời em nhé! 💝
             </p>
-            <p style="font-size: 0.9em; margin-top: 20px; font-style: italic;">
-                🌸 Dành tặng: Hà Bảo Ngân Hiếu 🌸
+            <p style="font-size: 0.95em; margin-top: 20px; font-style: italic; color: #ffe6f0;">
+                ✨ Yêu thương gửi đến em: Hà Bảo Ngân Hiếu ✨
             </p>
         </div>
     </div>
@@ -183,17 +214,23 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // Nút "KHÔNG" chạy lung tung
-        noBtn.addEventListener('mouseenter', () => {
+        // Nút "KHÔNG" chạy lung tung (cả mouseenter và touchstart cho mobile)
+        function moveNoButton() {
             const maxX = window.innerWidth - noBtn.offsetWidth - 100;
             const maxY = window.innerHeight - noBtn.offsetHeight - 100;
 
-            const randomX = Math.random() * maxX;
-            const randomY = Math.random() * maxY;
+            const randomX = Math.max(20, Math.random() * maxX);
+            const randomY = Math.max(20, Math.random() * maxY);
 
             noBtn.style.position = 'fixed';
             noBtn.style.left = randomX + 'px';
             noBtn.style.top = randomY + 'px';
+        }
+
+        noBtn.addEventListener('mouseenter', moveNoButton);
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            moveNoButton();
         });
 
         // Nút "CÓ" - Hiện pháo hoa và hoa
