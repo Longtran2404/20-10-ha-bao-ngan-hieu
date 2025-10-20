@@ -216,21 +216,89 @@
 
         // Nút "KHÔNG" chạy lung tung (cả mouseenter và touchstart cho mobile)
         function moveNoButton() {
-            const maxX = window.innerWidth - noBtn.offsetWidth - 100;
-            const maxY = window.innerHeight - noBtn.offsetHeight - 100;
+            // Lấy vị trí và kích thước của nút ĐẸP
+            const yesRect = yesBtn.getBoundingClientRect();
+            const noWidth = noBtn.offsetWidth;
+            const noHeight = noBtn.offsetHeight;
 
-            const randomX = Math.max(20, Math.random() * maxX);
-            const randomY = Math.max(20, Math.random() * maxY);
+            const padding = 20;
+            const avoidRadius = 150; // Khoảng cách tránh nút ĐẸP
+
+            let randomX, randomY;
+            let attempts = 0;
+            const maxAttempts = 20;
+
+            // Thử tìm vị trí không che nút ĐẸP
+            do {
+                randomX = Math.random() * (window.innerWidth - noWidth - padding * 2) + padding;
+                randomY = Math.random() * (window.innerHeight - noHeight - padding * 2) + padding;
+
+                // Tính khoảng cách từ nút KHÔNG đến nút ĐẸP
+                const noCenterX = randomX + noWidth / 2;
+                const noCenterY = randomY + noHeight / 2;
+                const yesCenterX = yesRect.left + yesRect.width / 2;
+                const yesCenterY = yesRect.top + yesRect.height / 2;
+
+                const distance = Math.sqrt(
+                    Math.pow(noCenterX - yesCenterX, 2) +
+                    Math.pow(noCenterY - yesCenterY, 2)
+                );
+
+                // Nếu đủ xa nút ĐẸP thì dùng vị trí này
+                if (distance > avoidRadius) {
+                    break;
+                }
+
+                attempts++;
+            } while (attempts < maxAttempts);
 
             noBtn.style.position = 'fixed';
             noBtn.style.left = randomX + 'px';
             noBtn.style.top = randomY + 'px';
         }
 
+        // Desktop: di chuyển khi hover
         noBtn.addEventListener('mouseenter', moveNoButton);
+
+        // Mobile: di chuyển khi touch hoặc touch move (nhạy hơn)
+        let lastMoveTime = 0;
+        const moveThrottle = 100; // milliseconds
+
         noBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             moveNoButton();
+        });
+
+        noBtn.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const now = Date.now();
+            if (now - lastMoveTime > moveThrottle) {
+                moveNoButton();
+                lastMoveTime = now;
+            }
+        });
+
+        // Thêm event khi ngón tay di chuyển gần nút (proximity detection)
+        document.addEventListener('touchmove', (e) => {
+            if (noBtn.style.position !== 'fixed') return;
+
+            const touch = e.touches[0];
+            const noRect = noBtn.getBoundingClientRect();
+
+            // Tính khoảng cách từ ngón tay đến nút
+            const distance = Math.sqrt(
+                Math.pow(touch.clientX - (noRect.left + noRect.width / 2), 2) +
+                Math.pow(touch.clientY - (noRect.top + noRect.height / 2), 2)
+            );
+
+            // Nếu ngón tay gần nút (trong vòng 80px), di chuyển nút
+            if (distance < 80) {
+                const now = Date.now();
+                if (now - lastMoveTime > moveThrottle) {
+                    moveNoButton();
+                    lastMoveTime = now;
+                }
+            }
         });
 
         // Nút "CÓ" - Hiện pháo hoa và hoa
