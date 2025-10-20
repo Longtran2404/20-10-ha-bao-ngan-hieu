@@ -8,7 +8,13 @@
       "Bash(vercel --prod --yes)",
       "Bash(git add index.html)",
       "Bash(git commit -m \"$(cat <<''EOF''\nUpdate with explosion flower effects and money rain\n\nFeatures added:\n- Flower explosion with code particles (hearts, stars, flowers)\n- More meaningful congratulation message\n- Money rain effect after flowers\n- Enhanced visual effects with 15 explosion points\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push origin master)"
+      "Bash(git push origin master)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nUpdate with warmer message and mobile optimization\n\nChanges:\n- Updated congratulation message with warmer, more personal tone\n- Added \"em\" pronoun addressing Hà Bảo Ngân Hiếu\n- Included caring reminders: work hard, sleep early, drink warm water\n- Added mobile-responsive design with media queries\n- Optimized button and text sizes for mobile devices\n- Added touch event support for \"NO\" button on mobile\n- Created vercel.json for proper domain configuration\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(vercel alias)",
+      "Bash(vercel ls)",
+      "Bash(vercel project rm 2010 --yes)",
+      "Bash(vercel link --project=20-10-ha-bao-ngan-hieu --yes)",
+      "Bash(git commit -m \"Update vercel.json configuration\")"
     ],
     "deny": [],
     "ask": []
