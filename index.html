@@ -89,6 +89,29 @@
             }
         }
 
+        .code-particle {
+            position: absolute;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.2em;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .money {
+            position: absolute;
+            font-size: 2em;
+            animation: moneyFall 3s linear forwards;
+            z-index: 5;
+        }
+
+        @keyframes moneyFall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
         .message {
             display: none;
             color: white;
@@ -135,8 +158,16 @@
         </div>
 
         <div id="messageContainer" class="message">
-            <p>🎉 YÊY! CHÚC BẠN 20/10 VUI VẺ! 🎉</p>
-            <p style="font-size: 0.8em; margin-top: 10px;">💐 Luôn xinh đẹp và hạnh phúc nhé! 💐</p>
+            <p style="font-size: 1.8em; margin-bottom: 15px;">🎉 Chúc Mừng 20/10! 🎉</p>
+            <p style="font-size: 1em; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+                💐 Chúc bạn luôn rạng rỡ như ánh mặt trời,<br>
+                Tươi trẻ như hoa, xinh đẹp như mơ.<br>
+                Hạnh phúc mỗi ngày, thành công trong công việc,<br>
+                Và luôn được yêu thương trọn vẹn! 💝
+            </p>
+            <p style="font-size: 0.9em; margin-top: 20px; font-style: italic;">
+                🌸 Dành tặng: Hà Bảo Ngân Hiếu 🌸
+            </p>
         </div>
     </div>
 
@@ -173,10 +204,15 @@
             // Hiệu ứng pháo hoa
             launchFireworks();
 
-            // Tạo hoa rơi
+            // Tạo hoa nổ dạng code
             setTimeout(() => {
-                createFallingFlowers();
-            }, 2000);
+                createFlowerExplosions();
+            }, 1500);
+
+            // Tạo tiền rơi
+            setTimeout(() => {
+                createMoneyRain();
+            }, 4500);
         });
 
         // Fireworks effect
@@ -233,25 +269,99 @@
             animate();
         }
 
-        // Falling flowers
-        function createFallingFlowers() {
+        // Flower explosions with code particles
+        function createFlowerExplosions() {
             const flowers = ['🌸', '🌺', '🌼', '🌻', '🌷', '🌹', '💐', '🏵️'];
+            const codeSymbols = ['<3', '♥', '★', '✨', '💕', '💖', '💗', '💝', '🌟', '⭐', '✿', '❀', '❁', '❃', '❋'];
 
-            for (let i = 0; i < 50; i++) {
+            // Tạo nhiều điểm nổ hoa
+            for (let explosion = 0; explosion < 15; explosion++) {
                 setTimeout(() => {
-                    const flower = document.createElement('div');
-                    flower.className = 'flower';
-                    flower.textContent = flowers[Math.floor(Math.random() * flowers.length)];
-                    flower.style.left = Math.random() * window.innerWidth + 'px';
-                    flower.style.top = '-50px';
-                    flower.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                    const centerX = Math.random() * window.innerWidth;
+                    const centerY = Math.random() * (window.innerHeight * 0.6);
 
-                    document.body.appendChild(flower);
+                    // Tạo hoa ở giữa
+                    const flowerCenter = document.createElement('div');
+                    flowerCenter.textContent = flowers[Math.floor(Math.random() * flowers.length)];
+                    flowerCenter.style.position = 'absolute';
+                    flowerCenter.style.left = centerX + 'px';
+                    flowerCenter.style.top = centerY + 'px';
+                    flowerCenter.style.fontSize = '3em';
+                    flowerCenter.style.zIndex = '5';
+                    document.body.appendChild(flowerCenter);
+
+                    // Nổ ra các code particles
+                    for (let i = 0; i < 25; i++) {
+                        const particle = document.createElement('div');
+                        particle.className = 'code-particle';
+                        particle.textContent = codeSymbols[Math.floor(Math.random() * codeSymbols.length)];
+
+                        const angle = (Math.PI * 2 * i) / 25;
+                        const velocity = 100 + Math.random() * 100;
+                        const vx = Math.cos(angle) * velocity;
+                        const vy = Math.sin(angle) * velocity;
+
+                        particle.style.left = centerX + 'px';
+                        particle.style.top = centerY + 'px';
+                        particle.style.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+
+                        document.body.appendChild(particle);
+
+                        // Animate particle
+                        let posX = centerX;
+                        let posY = centerY;
+                        let currentVx = vx;
+                        let currentVy = vy;
+                        let life = 100;
+
+                        const animateParticle = () => {
+                            posX += currentVx * 0.02;
+                            posY += currentVy * 0.02;
+                            currentVy += 0.5; // gravity
+                            life--;
+
+                            particle.style.left = posX + 'px';
+                            particle.style.top = posY + 'px';
+                            particle.style.opacity = life / 100;
+
+                            if (life > 0 && posY < window.innerHeight) {
+                                requestAnimationFrame(animateParticle);
+                            } else {
+                                particle.remove();
+                            }
+                        };
+
+                        animateParticle();
+                    }
+
+                    // Xóa hoa ở giữa sau một lúc
+                    setTimeout(() => {
+                        flowerCenter.remove();
+                    }, 1000);
+
+                }, explosion * 200);
+            }
+        }
+
+        // Money rain effect
+        function createMoneyRain() {
+            const moneySymbols = ['💵', '💴', '💶', '💷', '💰', '💸'];
+
+            for (let i = 0; i < 80; i++) {
+                setTimeout(() => {
+                    const money = document.createElement('div');
+                    money.className = 'money';
+                    money.textContent = moneySymbols[Math.floor(Math.random() * moneySymbols.length)];
+                    money.style.left = Math.random() * window.innerWidth + 'px';
+                    money.style.top = '-50px';
+                    money.style.animationDuration = (Math.random() * 2 + 2) + 's';
+
+                    document.body.appendChild(money);
 
                     setTimeout(() => {
-                        flower.remove();
+                        money.remove();
                     }, 5000);
-                }, i * 100);
+                }, i * 80);
             }
         }
 
