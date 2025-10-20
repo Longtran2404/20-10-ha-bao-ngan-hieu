@@ -286,16 +286,6 @@
         const proximityRadius = 120; // Bán kính phát hiện (px)
 
         document.addEventListener('mousemove', (e) => {
-            // Chỉ áp dụng khi nút đã được set position fixed
-            if (!noBtn.style.position || noBtn.style.position === 'relative') {
-                noBtn.style.position = 'fixed';
-                const rect = noBtn.getBoundingClientRect();
-                noBtn.style.left = rect.left + 'px';
-                noBtn.style.top = rect.top + 'px';
-                lastPosition.x = rect.left;
-                lastPosition.y = rect.top;
-            }
-
             const noRect = noBtn.getBoundingClientRect();
             const noCenterX = noRect.left + noRect.width / 2;
             const noCenterY = noRect.top + noRect.height / 2;
@@ -306,8 +296,12 @@
                 Math.pow(e.clientY - noCenterY, 2)
             );
 
-            // Nếu chuột gần nút, di chuyển nút
+            // Nếu chuột gần nút, khởi tạo và di chuyển nút
             if (distance < proximityRadius) {
+                if (!isInitialized) {
+                    initializeNoButtonPosition();
+                }
+
                 const now = Date.now();
                 if (now - lastMoveTime > moveThrottle) {
                     moveNoButton(e.clientX, e.clientY);
@@ -318,16 +312,6 @@
 
         // Proximity detection cho touch (mobile)
         document.addEventListener('touchmove', (e) => {
-            // Chỉ áp dụng khi nút đã được set position fixed
-            if (!noBtn.style.position || noBtn.style.position === 'relative') {
-                noBtn.style.position = 'fixed';
-                const rect = noBtn.getBoundingClientRect();
-                noBtn.style.left = rect.left + 'px';
-                noBtn.style.top = rect.top + 'px';
-                lastPosition.x = rect.left;
-                lastPosition.y = rect.top;
-            }
-
             const touch = e.touches[0];
             const noRect = noBtn.getBoundingClientRect();
             const noCenterX = noRect.left + noRect.width / 2;
@@ -339,8 +323,12 @@
                 Math.pow(touch.clientY - noCenterY, 2)
             );
 
-            // Nếu ngón tay gần nút (trong vòng proximityRadius), di chuyển nút
+            // Nếu ngón tay gần nút, khởi tạo và di chuyển nút
             if (distance < proximityRadius) {
+                if (!isInitialized) {
+                    initializeNoButtonPosition();
+                }
+
                 const now = Date.now();
                 if (now - lastMoveTime > moveThrottle) {
                     moveNoButton(touch.clientX, touch.clientY);
@@ -349,38 +337,20 @@
             }
         });
 
-        // Touchstart để khởi tạo position ngay lập tức
-        document.addEventListener('touchstart', (e) => {
-            if (!isInitialized) {
-                initializeNoButtonPosition();
-            }
-        });
-
-        // Khởi tạo vị trí nút "KHÔNG" khi trang load
+        // Khởi tạo vị trí ban đầu khi lần đầu tương tác
         function initializeNoButtonPosition() {
             if (isInitialized) return;
 
-            // Chờ để đảm bảo các element đã render đúng
-            setTimeout(() => {
-                const rect = noBtn.getBoundingClientRect();
-                lastPosition.x = rect.left;
-                lastPosition.y = rect.top;
+            const rect = noBtn.getBoundingClientRect();
+            lastPosition.x = rect.left;
+            lastPosition.y = rect.top;
 
-                // Di chuyển nút sang vị trí ngẫu nhiên ngay lập tức
-                moveNoButton();
-                isInitialized = true;
-            }, 100);
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = rect.left + 'px';
+            noBtn.style.top = rect.top + 'px';
+
+            isInitialized = true;
         }
-
-        // Khởi tạo khi trang load xong
-        window.addEventListener('load', initializeNoButtonPosition);
-
-        // Backup: khởi tạo sau 500ms nếu load event chưa chạy
-        setTimeout(() => {
-            if (!isInitialized) {
-                initializeNoButtonPosition();
-            }
-        }, 500);
 
         // Nút "CÓ" - Hiện pháo hoa và hoa
         yesBtn.addEventListener('click', () => {
