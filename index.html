@@ -214,8 +214,10 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // Nút "KHÔNG" chạy lung tung (cả mouseenter và touchstart cho mobile)
-        function moveNoButton() {
+        // Nút "KHÔNG" chạy lung tung với proximity detection
+        let lastPosition = { x: 0, y: 0 };
+
+        function moveNoButton(cursorX, cursorY) {
             // Lấy vị trí và kích thước của nút ĐẸP
             const yesRect = yesBtn.getBoundingClientRect();
             const noWidth = noBtn.offsetWidth;
@@ -223,13 +225,15 @@
 
             const padding = 20;
             const avoidRadius = 150; // Khoảng cách tránh nút ĐẸP
+            const minMoveDistance = 200; // Khoảng cách tối thiểu giữa các lần di chuyển
 
             let randomX, randomY;
             let attempts = 0;
-            const maxAttempts = 20;
+            const maxAttempts = 50;
 
-            // Thử tìm vị trí không che nút ĐẸP
+            // Thử tìm vị trí không che nút ĐẸP và đủ xa vị trí cũ
             do {
+                // Random vị trí trên toàn màn hình
                 randomX = Math.random() * (window.innerWidth - noWidth - padding * 2) + padding;
                 randomY = Math.random() * (window.innerHeight - noHeight - padding * 2) + padding;
 
@@ -239,65 +243,120 @@
                 const yesCenterX = yesRect.left + yesRect.width / 2;
                 const yesCenterY = yesRect.top + yesRect.height / 2;
 
-                const distance = Math.sqrt(
+                const distanceToYes = Math.sqrt(
                     Math.pow(noCenterX - yesCenterX, 2) +
                     Math.pow(noCenterY - yesCenterY, 2)
                 );
 
-                // Nếu đủ xa nút ĐẸP thì dùng vị trí này
-                if (distance > avoidRadius) {
+                // Tính khoảng cách với vị trí cũ
+                const distanceToLast = Math.sqrt(
+                    Math.pow(randomX - lastPosition.x, 2) +
+                    Math.pow(randomY - lastPosition.y, 2)
+                );
+
+                // Tính khoảng cách với con trỏ/ngón tay
+                const distanceToCursor = cursorX && cursorY ? Math.sqrt(
+                    Math.pow(noCenterX - cursorX, 2) +
+                    Math.pow(noCenterY - cursorY, 2)
+                ) : Infinity;
+
+                // Nếu đủ xa nút ĐẸP, đủ xa vị trí cũ, và đủ xa con trỏ
+                if (distanceToYes > avoidRadius &&
+                    (distanceToLast > minMoveDistance || attempts > 30) &&
+                    distanceToCursor > 150) {
                     break;
                 }
 
                 attempts++;
             } while (attempts < maxAttempts);
 
+            // Lưu vị trí mới
+            lastPosition.x = randomX;
+            lastPosition.y = randomY;
+
             noBtn.style.position = 'fixed';
             noBtn.style.left = randomX + 'px';
             noBtn.style.top = randomY + 'px';
         }
 
-        // Desktop: di chuyển khi hover
-        noBtn.addEventListener('mouseenter', moveNoButton);
-
-        // Mobile: di chuyển khi touch hoặc touch move (nhạy hơn)
+        // Proximity detection cho chuột (desktop)
         let lastMoveTime = 0;
-        const moveThrottle = 100; // milliseconds
+        const moveThrottle = 150; // milliseconds
+        const proximityRadius = 120; // Bán kính phát hiện (px)
 
-        noBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            moveNoButton();
-        });
+        document.addEventListener('mousemove', (e) => {
+            // Chỉ áp dụng khi nút đã được set position fixed
+            if (!noBtn.style.position || noBtn.style.position === 'relative') {
+                noBtn.style.position = 'fixed';
+                const rect = noBtn.getBoundingClientRect();
+                noBtn.style.left = rect.left + 'px';
+                noBtn.style.top = rect.top + 'px';
+                lastPosition.x = rect.left;
+                lastPosition.y = rect.top;
+            }
 
-        noBtn.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const now = Date.now();
-            if (now - lastMoveTime > moveThrottle) {
-                moveNoButton();
-                lastMoveTime = now;
+            const noRect = noBtn.getBoundingClientRect();
+            const noCenterX = noRect.left + noRect.width / 2;
+            const noCenterY = noRect.top + noRect.height / 2;
+
+            // Tính khoảng cách từ chuột đến nút
+            const distance = Math.sqrt(
+                Math.pow(e.clientX - noCenterX, 2) +
+                Math.pow(e.clientY - noCenterY, 2)
+            );
+
+            // Nếu chuột gần nút, di chuyển nút
+            if (distance < proximityRadius) {
+                const now = Date.now();
+                if (now - lastMoveTime > moveThrottle) {
+                    moveNoButton(e.clientX, e.clientY);
+                    lastMoveTime = now;
+                }
             }
         });
 
-        // Thêm event khi ngón tay di chuyển gần nút (proximity detection)
+        // Proximity detection cho touch (mobile)
         document.addEventListener('touchmove', (e) => {
-            if (noBtn.style.position !== 'fixed') return;
+            // Chỉ áp dụng khi nút đã được set position fixed
+            if (!noBtn.style.position || noBtn.style.position === 'relative') {
+                noBtn.style.position = 'fixed';
+                const rect = noBtn.getBoundingClientRect();
+                noBtn.style.left = rect.left + 'px';
+                noBtn.style.top = rect.top + 'px';
+                lastPosition.x = rect.left;
+                lastPosition.y = rect.top;
+            }
 
             const touch = e.touches[0];
             const noRect = noBtn.getBoundingClientRect();
+            const noCenterX = noRect.left + noRect.width / 2;
+            const noCenterY = noRect.top + noRect.height / 2;
 
             // Tính khoảng cách từ ngón tay đến nút
             const distance = Math.sqrt(
-                Math.pow(touch.clientX - (noRect.left + noRect.width / 2), 2) +
-                Math.pow(touch.clientY - (noRect.top + noRect.height / 2), 2)
+                Math.pow(touch.clientX - noCenterX, 2) +
+                Math.pow(touch.clientY - noCenterY, 2)
             );
 
-            // Nếu ngón tay gần nút (trong vòng 80px), di chuyển nút
-            if (distance < 80) {
+            // Nếu ngón tay gần nút (trong vòng proximityRadius), di chuyển nút
+            if (distance < proximityRadius) {
                 const now = Date.now();
                 if (now - lastMoveTime > moveThrottle) {
-                    moveNoButton();
+                    moveNoButton(touch.clientX, touch.clientY);
                     lastMoveTime = now;
                 }
+            }
+        });
+
+        // Touchstart để khởi tạo position ngay lập tức
+        document.addEventListener('touchstart', (e) => {
+            if (!noBtn.style.position || noBtn.style.position === 'relative') {
+                noBtn.style.position = 'fixed';
+                const rect = noBtn.getBoundingClientRect();
+                noBtn.style.left = rect.left + 'px';
+                noBtn.style.top = rect.top + 'px';
+                lastPosition.x = rect.left;
+                lastPosition.y = rect.top;
             }
         });
 
